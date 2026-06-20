@@ -100,6 +100,8 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button id="replyModBtn" type="button" class="btn btn-warning">Modify</button>
+                <button id="replyDelBtn" type="button" class="btn btn-danger">Delete</button>
                 <button id="replyRegBtn" type="button" class="btn btn-primary">Register</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
@@ -177,7 +179,7 @@
             const {rno, replyText, replyer} = reply; // 구조분해할당
 
             str += `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+                <li data-rno="\${rno}" class="list-group-item d-flex justify-content-between align-items-center">
                 \${rno} \${replyText}
                 <span class="badge badge-primary badge-pill">\${replyer}</span>
                 </li>`
@@ -217,8 +219,25 @@
         e.stopPropagation()
         const target = e.target
         const pageNum = target.getAttribute("href")
-
+        currentPage = pageNum
         getList(pageNum)
+    }, false)
+
+    let currentPage = 1; // 현재 댓글 페이지 번호
+    let currentRno = 0; // 현재 댓글 번호
+
+    replyUL.addEventListener("click", e => {
+        const target = e.target
+        e.stopPropagation()
+        currentRno = target.getAttribute("data-rno")
+
+        // async가 있는 곳을 호출하는것은 Promise객체를 반환하므로 then, result를 쓸 수 있다.
+        getReply(currentRno)
+            .then(result => {
+                replyTextInput.value = result.replyText
+                replyerInput.value = result.replyer
+                replyModal.show()
+            })
     }, false)
 
     getList()
@@ -227,7 +246,23 @@
     const replyTextInput = document.querySelector("input[name='replyText']")
     const replyerInput = document.querySelector("input[name='replyer']")
 
-    replyModal.show()
+    const getReply = async (rno) => {
+        const res = await axios.get(`/reply/\${rno}`)
+
+        return res.data
+    }
+
+    const deleteReply = async (rno) => {
+       const res = await axios.delete(`/reply/\${rno}`)
+        return res.data // {Result:true}
+    }
+
+    const modifyReply = async (rno, replyObj) => {
+        const res = await axios.put(`/reply/\${rno}`, replyObj)
+        return res.data
+    }
+
+    // replyModal.show()
 
     document.querySelector('#replyRegBtn').addEventListener("click", e => {
         e.preventDefault() // 이벤트에 다른 동작이 작동되지 않도록 한다.
@@ -243,5 +278,27 @@
             replyModal.hide()
         })
     }, false)
+
+    document.querySelector('#replyDelBtn').addEventListener("click", e => {
+        deleteReply(currentRno).then(result => {
+            alert('댓글이 삭제되었습니다.')
+            replyModal.hide()
+            getList()
+        })
+    })
+
+    document.querySelector("#replyModBtn").addEventListener("click", e => {
+        const replyObj = {
+            replyText: replyTextInput.value,
+            replyer: replyerInput.value,
+            bno: boardBno
+        }
+
+        modifyReply(currentRno, replyObj).then(result => {
+            alert("댓글이 수정되었습니다.")
+            replyModal.hide()
+            getList(currentPage)
+        })
+    },false)
 </script>
 <%@include file="../includes/end.jsp"%>

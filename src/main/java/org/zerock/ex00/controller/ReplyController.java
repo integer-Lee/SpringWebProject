@@ -36,14 +36,14 @@ public class ReplyController {
        return  replyService.get(rno);
     }
 
-    @DeleteMapping("/rno")
+    @DeleteMapping("/{rno}")
     public Map<String, Boolean> delete(@PathVariable("rno") Long rno){
         boolean result = replyService.remove(rno);
 
         return Map.of("Result", result);
     }
 
-    @PutMapping("/rno")
+    @PutMapping("/{rno}")
     public Map<String, Boolean> modify(
             @PathVariable("rno") Long rno,
             @RequestBody ReplyVO replyVO){
