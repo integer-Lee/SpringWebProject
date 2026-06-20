@@ -159,6 +159,12 @@
 
     const registerReply = async (replyObj) => {
         const res = await axios.post('/reply/register', replyObj)
+
+        const data = res.data
+
+        const lastPage = Math.ceil(data.COUNT / 10.0)
+
+        getList(lastPage)
     }
 
     const printReplyList = (pageDTO, replyList) => {

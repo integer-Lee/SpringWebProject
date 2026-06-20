@@ -25,7 +25,10 @@ public class ReplyController {
     public Map<String, Long> register(@RequestBody ReplyVO replyVO){ //Json데이터로 처리하고 싶은면 @RequestBody가 반드시 필요함.
         log.info(replyVO);
         Long rno = replyService.register(replyVO);
-        return Map.of("rno", rno);
+
+        int replyCount = replyService.getReplyCountOfBoard(replyVO.getBno());
+
+        return Map.of("rno", rno, "COUNT", (long) replyCount);
     }
 
     @GetMapping("/{rno}")

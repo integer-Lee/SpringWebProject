@@ -25,6 +25,10 @@ public class ReplyService {
         return replyVO.getRno();
     }
 
+    public int getReplyCountOfBoard(Long bno){
+        return replyMapper.getTotal(null, bno);
+    }
+
     public ReplyVO get(Long rno){
         return replyMapper.selectOne(rno);
     }
